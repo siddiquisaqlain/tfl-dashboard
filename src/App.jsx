@@ -92,82 +92,8 @@ function App() {
   const [clock, setClock] = useState(new Date());
 
   const fetchData = async () => {
-  // Put these in Cloudflare env vars later (recommended)
-  const TFL_APP_ID = import.meta.env.VITE_TFL_APP_ID;
-  const TFL_APP_KEY = import.meta.env.VITE_TFL_APP_KEY;
-
-  const TRAIN_STOP_ID = "910GACTONML";     // Acton Main Line
-  const BUS_STOP_IN = "490006737N";        // Faraday Road (dir 1)
-  const BUS_STOP_OUT = "490015046S";       // Faraday Road (dir 2)
-
-  // TfL: line status + arrivals
-  const [statusRes, trainRes, busInRes, busOutRes, weatherRes] = await Promise.all([
-    axios.get("https://api.tfl.gov.uk/Line/elizabeth/Status", {
-      params: { app_id: TFL_APP_ID, app_key: TFL_APP_KEY },
-    }),
-    axios.get(`https://api.tfl.gov.uk/StopPoint/${TRAIN_STOP_ID}/Arrivals`, {
-      params: { app_id: TFL_APP_ID, app_key: TFL_APP_KEY },
-    }),
-    axios.get(`https://api.tfl.gov.uk/StopPoint/${BUS_STOP_IN}/Arrivals`, {
-      params: { app_id: TFL_APP_ID, app_key: TFL_APP_KEY },
-    }),
-    axios.get(`https://api.tfl.gov.uk/StopPoint/${BUS_STOP_OUT}/Arrivals`, {
-      params: { app_id: TFL_APP_ID, app_key: TFL_APP_KEY },
-    }),
-    axios.get("https://api.open-meteo.com/v1/forecast", {
-      params: {
-        latitude: 51.5074,
-        longitude: -0.1278,
-        current: "temperature_2m,apparent_temperature,wind_speed_10m,weather_code",
-        hourly: "precipitation_probability",
-        forecast_days: 1,
-        timezone: "Europe/London",
-      },
-    }),
-  ]);
-
-  const status =
-    statusRes.data?.[0]?.lineStatuses?.[0]?.statusSeverityDescription ?? "Status unavailable";
-
-  const trainsAll = (trainRes.data || [])
-    .filter((t) => t.lineId === "elizabeth")
-    .sort((a, b) => a.timeToStation - b.timeToStation);
-
-  const trains = {
-    inbound: trainsAll.filter((t) => t.direction === "inbound").slice(0, 2),
-    outbound: trainsAll.filter((t) => t.direction === "outbound").slice(0, 2),
-  };
-
-  const filterBus = (arr) =>
-    (arr || [])
-      .filter((b) => b.lineId === "266" || b.lineId === "440" || b.lineId === "N266")
-      .sort((a, b) => a.timeToStation - b.timeToStation)
-      .slice(0, 2);
-
-  const buses = {
-    inbound: filterBus(busInRes.data),
-    outbound: filterBus(busOutRes.data),
-  };
-
-  // Weather parsing (same idea as before)
-  const current = weatherRes.data?.current;
-  const hourly = weatherRes.data?.hourly;
-
-  let precipProb = null;
-  if (current?.time && hourly?.time?.length && hourly?.precipitation_probability?.length) {
-    const idx = hourly.time.indexOf(current.time);
-    precipProb = idx >= 0 ? hourly.precipitation_probability[idx] : hourly.precipitation_probability[0];
-  }
-
-  const weather = {
-    temp: current?.temperature_2m ?? null,
-    feelsLike: current?.apparent_temperature ?? null,
-    wind: current?.wind_speed_10m ?? null,
-    code: current?.weather_code ?? null,
-    precipProb,
-  };
-
-  setData({ status, trains, buses, weather });
+  const res = await axios.get("/api/dashboard");
+  setData(res.data);
 };
 
   useEffect(() => {
