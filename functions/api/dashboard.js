@@ -47,7 +47,7 @@ export async function onRequestGet(context) {
       outbound: trainsAll.filter((t) => t.direction === "outbound").slice(0, 2),
     };
 
-    const allowedBus = new Set(["266", "440","N266"]); // add N266 later
+    const allowedBus = new Set(["266", "440"]); // add N266 later
     const filterBus = (arr) =>
       (arr || [])
         .filter((b) => allowedBus.has(b.lineId))
