@@ -140,7 +140,7 @@ function App() {
 
   const filterBus = (arr) =>
     (arr || [])
-      .filter((b) => b.lineId === "266" || b.lineId === "440")
+      .filter((b) => b.lineId === "266" || b.lineId === "440" || b.lineId === "N266")
       .sort((a, b) => a.timeToStation - b.timeToStation)
       .slice(0, 2);
 
